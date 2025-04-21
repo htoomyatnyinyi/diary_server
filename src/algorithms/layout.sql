@@ -1,0 +1,25 @@
+-- CREATE TABLE users (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     email VARCHAR(255) UNIQUE NOT NULL,
+--     password VARCHAR(255) NOT NULL, -- Hashed
+--     active_role ENUM('seeker', 'employer') DEFAULT 'seeker', -- Current active role
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- CREATE TABLE seeker_profiles (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     user_id INT NOT NULL,
+--     full_name VARCHAR(255),
+--     skills TEXT, -- e.g., "React, Node.js"
+--     resume_url VARCHAR(255), -- Link to uploaded resume
+--     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+-- );
+
+-- CREATE TABLE employer_profiles (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     user_id INT NOT NULL,
+--     company_name VARCHAR(255),
+--     company_description TEXT,
+--     website_url VARCHAR(255),
+--     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+-- );
