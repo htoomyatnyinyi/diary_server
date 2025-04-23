@@ -80,7 +80,7 @@ app.use((err, req, res, next) => {
     .json({ message: "Internal server error", error: err.message });
 });
 
-initializeDatabase();
+// initializeDatabase();
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`SERVER_IS_RUNNING_ON:${PORT}`));
