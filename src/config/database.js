@@ -6,11 +6,12 @@ dotenv.config();
 // MySQL connection pool configuration
 const pool = mysql
   .createPool({
-    host: process.env.DB_HOST || "localhost", // Replace with your MySQL host
-    user: process.env.DB_USER || "root", // Replace with your MySQL username
-    password: process.env.DB_PASSWORD || "hmnn", // Replace with your MySQL password
-    database: process.env.DB_NAME || "nobel", // Replace with your database name
-    port: process.env.DB_PORT || 3306,
+    host: process.env.MYSQL_HOST || "localhost", // Replace with your MySQL host
+    user: process.env.MYSQL_USER || "root", // Replace with your MySQL username
+    password: process.env.MYSQL_PASSWORD || "hmnn", // Replace with your MySQL password
+    database: process.env.MYSQL_DATABASE, // Replace with your database name
+    // database: process.env.MYSQL_NAME || "nobel", // Replace with your database name
+    port: process.env.MYSQL_PORT || 3306,
     waitForConnections: true, // Ensure pool waits for connections
     connectionLimit: 10, // Limit concurrent connections // Max connections in pool
     queueLimit: 0, // Unlimited queue for waiting connections

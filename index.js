@@ -42,9 +42,15 @@ const __dirname = path.dirname(__filename);
 //   })
 // );
 
+// app.use(
+//   cors({
+//     origin: process.env.FRONTEND_URL || "http://localhost:5173",
+//     credentials: true,
+//   })
+// );
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "https://jobdiary-server.vercel.app",
     credentials: true,
   })
 );
@@ -80,7 +86,7 @@ app.use((err, req, res, next) => {
     .json({ message: "Internal server error", error: err.message });
 });
 
-// initializeDatabase();
+initializeDatabase();
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`SERVER_IS_RUNNING_ON:${PORT}`));

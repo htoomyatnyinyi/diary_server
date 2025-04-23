@@ -37,7 +37,7 @@ const googleLogin = async (req, res) => {
       // Create new user
       const username = name || email.split("@")[0];
       const hashedPassword = await bcrypt.hash(googleId, 10); // Use googleId as a dummy password
-      const userRole = "job_seeker"; // Default role, adjust as needed
+      const userRole = "user"; // Default role, adjust as needed
 
       const [result] = await pool.query(
         "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
@@ -110,7 +110,7 @@ const registerEmployer = async (req, res) => {
       return res.status(400).json({ message: "Email must end with @mail.com" });
     }
 
-    const userRole = role || "job_seeker";
+    const userRole = role || "user";
 
     const [existingUsers] = await pool.query(
       "SELECT email FROM users WHERE email = ?",
@@ -194,7 +194,7 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "Email must end with @mail.com" });
     }
 
-    const userRole = role || "job_seeker";
+    const userRole = role || "user";
 
     const [existingUsers] = await pool.query(
       "SELECT email FROM users WHERE email = ?",
