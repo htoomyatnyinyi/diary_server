@@ -50,7 +50,7 @@ const __dirname = path.dirname(__filename);
 // );
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "https://jobdiary-server.vercel.app",
+    origin: process.env.FRONTEND_URL || "https://jobdiary.vercel.app",
     credentials: true,
   })
 );
