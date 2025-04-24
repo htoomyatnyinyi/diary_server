@@ -33,164 +33,89 @@ const upload = multer({
 // file preview path
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// User Analytics
-const getUserAnalytics = async (req, res) => {
-  // userId = 3;
-  try {
-    // const [[a]] = await pool.query(
-    //   "SELECT COUNT(*) as savedJob FROM saved_jobs WHERE user_id=3"
-    // );
-    const [[a]] = await pool.query(
-      "SELECT DATE (sj.saved_at) as date, COUNT(*) as savedJob FROM saved_jobs sj WHERE user_id=3 GROUP BY date ORDER BY date ASC"
-    );
-    const [[b]] = await pool.query(
-      "SELECT COUNT(*) as appliedJob FROM job_applications WHERE user_id=3"
-    );
-    const [[c]] = await pool.query(
-      "SELECT COUNT(*) as uploadResumes FROM resumes WHERE user_id=3"
-    );
-    // const [[a]] = await pool.query(
-    //   "SELECT COUNT(*) as savedJob FROM saved_jobs WHERE user_id=3"
-    // );
-    // const [[b]] = await pool.query(
-    //   "SELECT COUNT(*) as appliedJob FROM job_applications WHERE user_id=3"
-    // );
-    // const [[c]] = await pool.query(
-    //   "SELECT COUNT(*) as uploadResumes FROM resumes WHERE user_id=3"
-    // );
-    // Replace this:
-    // const [[a]] = await pool.query(
-    //   "SELECT DATE (sj.applied_at) as date, COUNT(*) as savedJob FROM saved_jobs sj WHERE user_id=3 ORDER BY date ASC"
-    // );
-
-    // With this to get daily saved job trend:
-    const [[{ count, date }]] = await pool.query(
-      "SELECT DATE(sj.saved_at) as date, COUNT(*) as count FROM saved_jobs sj WHERE user_id=3 GROUP BY date ORDER BY date ASC"
-    );
-    console.log(a, b, c, count, date, " at bakend analytics");
-
-    const [[{ total_users }]] = await pool.query(
-      "SELECT COUNT(*) as total_users FROM users"
-    );
-    const [[{ total_jobs }]] = await pool.query(
-      "SELECT COUNT(*) as total_jobs FROM job_posts"
-    );
-    const [[{ total_applications }]] = await pool.query(
-      "SELECT COUNT(*) as total_applications FROM job_applications"
-    );
-    res.json({
-      success: true,
-      data: {
-        total_users,
-        total_jobs,
-        total_applications,
-        total_savedJobs: a.savedJob,
-        total_appliedJobs: b.appliedJob,
-        total_uploadedResumes: c.uploadResumes,
-        savedJobTrend: { date, count },
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// console.log(__dirname, "dirname");
-
-// const fileResumes = (req, res) => {
-//   console.log(req.params.filename, "filename");
-//   const filename = req.params.filename || req.body.filename;
-
-//   if (!filename) {
-//     return res.status(400).json({ error: "Filename is required" });
-//   }
-
-//   // const filePath = path.join(__dirname, "../uploads/resumes", filename);
-//   const filePath = path.join(__dirname, "../../uploads", filename);
-
-//   console.log("Fetching file from:", filePath); // Debugging
-
-//   fs.readFile(filePath, (err, data) => {
-//     if (err) {
-//       console.error("Error reading file:", err);
-//       res.status(404).send("File not found");
-//     } else {
-//       // res.cookie("pdfURL", data);
-//       console.log("Serving file:", filePath);
-//       res.setHeader("Content-Type", "application/pdf");
-//       res.send(data);
-//     }
-//   });
-//   // res.sendFile(filePath, (err) => {
-//   //   if (err) {
-//   //     console.error("Error sending file:", err);
-//   //     res.status(500).json({ error: "Error fetching file" });
-//   //   }
-//   // });
-// };
-
-const fileResumes = (req, res) => {
+const fileResumes = async (req, res) => {
+  const { filename } = req.params;
   const userId = req.user.id;
-  const filename = req.params.filename;
 
-  if (!filename && !userId) {
-    return res.status(400).json({ error: "Filename is required" });
+  if (!filename || !userId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Filename and user ID are required" });
   }
 
-  const filePath = path.join(__dirname, "../../uploads", filename);
+  try {
+    // Verify the resume belongs to the user
+    const [resumes] = await pool.query(
+      "SELECT file_path, file_type FROM resumes WHERE user_id = ? AND file_name = ?",
+      [userId, filename]
+    );
 
-  if (!fs.existsSync(filePath)) {
-    console.error("File not found:", filePath);
-    return res.status(404).json({ error: "File not found" });
-  }
-
-  res.setHeader("Content-Type", "application/pdf");
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      console.error("Error sending file:", err);
-      return res.status(500).json({ error: "Error serving file" });
-    } else {
-      console.log("Successfully served:", filePath);
+    if (!resumes.length) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized or file not found" });
     }
-  });
+
+    // Inside the try block, after validating resumes.length
+    const { file_path, file_type } = resumes[0];
+    // Assume file_path from DB is like "uploads/user_xyz/resume_abc.pdf"
+    // Construct the full path based *only* on the DB value and a reliable base path.
+    // Using process.cwd() or a dedicated base path variable is often better than __dirname
+    // if your uploads folder isn't always relative to *this specific file's* directory.
+    // Let's assume a base path relative to the project root:
+    const basePath = path.resolve(__dirname, "../../"); // Or better: process.cwd() if applicable
+    const secureFullPath = path.join(basePath, file_path); // USE THIS PATH
+
+    console.log("Attempting to serve file from DB path:", secureFullPath);
+    if (!fs.existsSync(secureFullPath)) {
+      return res
+        .status(404)
+        .json({ success: false, message: "File not found" });
+    }
+
+    res.setHeader("Content-Type", file_type);
+    res.sendFile(secureFullPath, (err) => {
+      if (err) {
+        console.error("Error sending file:", err);
+        return res
+          .status(500)
+          .json({ success: false, message: "Error serving file" });
+      }
+    });
+    // const { file_path, file_type } = resumes[0];
+    // const fullPath = path.join(__dirname, "../../uploads", filename);
+    // const sqlPath = path.join(__dirname, "../../", file_path);
+
+    // console.log(sqlPath, "\n", fullPath);
+
+    // if (!fs.existsSync(fullPath)) {
+    //   return res
+    //     .status(404)
+    //     .json({ success: false, message: "File not found" });
+    // }
+
+    // res.setHeader("Content-Type", file_type);
+    // res.sendFile(fullPath, (err) => {
+    //   if (err) {
+    //     console.error("Error sending file:", err);
+    //     return res
+    //       .status(500)
+    //       .json({ success: false, message: "Error serving file" });
+    //   }
+    // });
+  } catch (error) {
+    console.error("Error fetching resume:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
 };
-
-// const fileResumes = (req, res) => {
-//   const filename = req.params.filename;
-
-//   if (!filename) {
-//     return res.status(400).json({ error: "Filename is required" });
-//   }
-
-//   const filePath = path.join(__dirname, "../../uploads", filename);
-
-//   console.log("Fetching file from:", filePath); // Debugging
-
-//   // Check if file exists before sending
-//   if (!fs.existsSync(filePath)) {
-//     console.error("File not found:", filePath);
-//     return res.status(404).json({ error: "File not found" });
-//   }
-
-//   // Serve the file directly with proper headers
-//   res.setHeader("Content-Type", "application/pdf");
-//   res.sendFile(filePath, (err) => {
-//     if (err) {
-//       console.error("Error sending file:", err);
-//       res.status(500).json({ error: "Error serving file" });
-//     } else {
-//       console.log("Successfully served file:", filePath);
-//     }
-//   });
-// };
 
 // Job Seeker Profile CRUD
 
 const createProfile = async (req, res) => {
-  // console.log(req.body, " at create Profile");
   const userId = req.user.id;
   const { first_name, last_name, phone, gender, date_of_birth, location, bio } =
     req.body;
+
   try {
     const [result] = await pool.query(
       "INSERT INTO job_seeker_profiles (user_id, first_name, last_name, phone, gender, date_of_birth, location, bio) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -199,7 +124,7 @@ const createProfile = async (req, res) => {
         first_name,
         last_name,
         phone,
-        gender || null,
+        gender || "prefer_not_to_say",
         date_of_birth || null,
         location || null,
         bio || null,
@@ -554,6 +479,68 @@ const deleteApplication = async (req, res) => {
       [id, req.user.id]
     );
     res.json({ success: true, message: "Application deleted" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// User Analytics
+const getUserAnalytics = async (req, res) => {
+  // userId = 3;
+  try {
+    // const [[a]] = await pool.query(
+    //   "SELECT COUNT(*) as savedJob FROM saved_jobs WHERE user_id=3"
+    // );
+    const [[a]] = await pool.query(
+      "SELECT DATE (sj.saved_at) as date, COUNT(*) as savedJob FROM saved_jobs sj WHERE user_id=3 GROUP BY date ORDER BY date ASC"
+    );
+    const [[b]] = await pool.query(
+      "SELECT COUNT(*) as appliedJob FROM job_applications WHERE user_id=3"
+    );
+    const [[c]] = await pool.query(
+      "SELECT COUNT(*) as uploadResumes FROM resumes WHERE user_id=3"
+    );
+    // const [[a]] = await pool.query(
+    //   "SELECT COUNT(*) as savedJob FROM saved_jobs WHERE user_id=3"
+    // );
+    // const [[b]] = await pool.query(
+    //   "SELECT COUNT(*) as appliedJob FROM job_applications WHERE user_id=3"
+    // );
+    // const [[c]] = await pool.query(
+    //   "SELECT COUNT(*) as uploadResumes FROM resumes WHERE user_id=3"
+    // );
+    // Replace this:
+    // const [[a]] = await pool.query(
+    //   "SELECT DATE (sj.applied_at) as date, COUNT(*) as savedJob FROM saved_jobs sj WHERE user_id=3 ORDER BY date ASC"
+    // );
+
+    // With this to get daily saved job trend:
+    const [[{ count, date }]] = await pool.query(
+      "SELECT DATE(sj.saved_at) as date, COUNT(*) as count FROM saved_jobs sj WHERE user_id=3 GROUP BY date ORDER BY date ASC"
+    );
+    console.log(a, b, c, count, date, " at bakend analytics");
+
+    const [[{ total_users }]] = await pool.query(
+      "SELECT COUNT(*) as total_users FROM users"
+    );
+    const [[{ total_jobs }]] = await pool.query(
+      "SELECT COUNT(*) as total_jobs FROM job_posts"
+    );
+    const [[{ total_applications }]] = await pool.query(
+      "SELECT COUNT(*) as total_applications FROM job_applications"
+    );
+    res.json({
+      success: true,
+      data: {
+        total_users,
+        total_jobs,
+        total_applications,
+        total_savedJobs: a.savedJob,
+        total_appliedJobs: b.appliedJob,
+        total_uploadedResumes: c.uploadResumes,
+        savedJobTrend: { date, count },
+      },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
