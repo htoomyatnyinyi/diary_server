@@ -23,26 +23,6 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// // Define the main uploads directory
-// const uploadsPath = path.join(__dirname, "uploads");
-// // Define the names of sub-directories
-// const subDirectories = ["profile_img", "cover_img", "post_img"];
-
-// // check if the main uploads folder exits, if not, create it.
-// if (!fs.existsSync(uploadsPath)) {
-//   fs.mkdirSync(uploadsPath);
-//   console.log("Created 'uplodas' directory");
-// }
-
-// // Create the sub-directories inside the uploads folder
-// subDirectories.forEach((subDir) => {
-//   const subDirPath = path.join(uploadsPath, subDir);
-//   if (!fs.existsSync(subDirPath)) {
-//     fs.mkdirSync(subDirPath);
-//     console.log(`Created sub-directory ${subDir} inside 'uploads'`);
-//   }
-// });
-
 app.use(
   cors({
     origin: (origin, callback) => {

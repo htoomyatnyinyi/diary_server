@@ -1,36 +1,10 @@
 import pool from "../config/database.js";
-import multer from "multer";
-import path from "path";
-import fs from "fs";
 import { fileURLToPath } from "url";
+import fileUploads from "../middleware/fileUploads.js";
+import path from "path";
+import fsPromises from "fs/promises";
+import fs from "fs";
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = "uploads/";
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now(2)}-${file.originalname.replace(ext, "")}${ext}`);
-  },
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    if (allowedTypes.includes(file.mimetype)) cb(null, true);
-    else cb(new Error("Only PDF, DOC, and DOCX files are allowed"));
-  },
-}).single("resume");
-
-// file preview path
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const fileResumes = async (req, res) => {
@@ -63,11 +37,20 @@ const fileResumes = async (req, res) => {
     // Using process.cwd() or a dedicated base path variable is often better than __dirname
     // if your uploads folder isn't always relative to *this specific file's* directory.
     // Let's assume a base path relative to the project root:
+
     const basePath = path.resolve(__dirname, "../../"); // Or better: process.cwd() if applicable
     const secureFullPath = path.join(basePath, file_path); // USE THIS PATH
 
     console.log("Attempting to serve file from DB path:", secureFullPath);
-    if (!fs.existsSync(secureFullPath)) {
+    // if (!fs.existsSync(secureFullPath)) {
+    //   return res
+    //     .status(404)
+    //     .json({ success: false, message: "File not found" });
+    // }
+    try {
+      await fs.promises.access(secureFullPath, fs.constants.F_OK);
+      // file exists
+    } catch (err) {
       return res
         .status(404)
         .json({ success: false, message: "File not found" });
@@ -218,17 +201,20 @@ const deleteProfile = async (req, res) => {
 
 // Resume CRUD
 const createResume = (req, res) => {
-  upload(req, res, async (err) => {
+  fileUploads.single("resume")(req, res, async (err) => {
     if (err)
       return res.status(400).json({ success: false, message: err.message });
 
-    // console.log(req.file.filename, req.file, "info");
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No file uploaded" });
+    }
 
-    const file_path = `/uploads/${req.file.filename}`;
+    const file_path = `/uploads/resume_docs/${req.file.filename}`;
     // const file_name = req.file.originalname;
     const file_name = req.file.filename;
     const file_type = req.file.mimetype;
-
     try {
       const [result] = await pool.query(
         "INSERT INTO resumes (user_id, file_path, file_name, file_type) VALUES (?, ?, ?, ?)",
@@ -240,32 +226,30 @@ const createResume = (req, res) => {
       res.status(500).json({ success: false, message: error.message });
     }
   });
+
+  // upload(req, res, async (err) => {
+  //   if (err)
+  //     return res.status(400).json({ success: false, message: err.message });
+
+  //   // console.log(req.file.filename, req.file, "info");
+
+  //   const file_path = `/uploads/${req.file.filename}`;
+  //   // const file_name = req.file.originalname;
+  //   const file_name = req.file.filename;
+  //   const file_type = req.file.mimetype;
+
+  //   try {
+  //     const [result] = await pool.query(
+  //       "INSERT INTO resumes (user_id, file_path, file_name, file_type) VALUES (?, ?, ?, ?)",
+  //       [req.user.id, file_path, file_name, file_type]
+  //     );
+
+  //     res.status(201).json({ success: true, id: result.insertId });
+  //   } catch (error) {
+  //     res.status(500).json({ success: false, message: error.message });
+  //   }
+  // });
 };
-
-// // Resume CRUD
-// const createResume = (req, res) => {
-//   upload(req, res, async (err) => {
-//     if (err)
-//       return res.status(400).json({ success: false, message: err.message });
-
-//     console.log(req.file, "info");
-
-//     // const file_path = `/uploads/${req.file.filename}`;
-//     // // const file_name = req.file.originalname;
-//     // const file_name = req.file.filename;
-//     // const file_type = req.file.mimetype;
-
-//     // try {
-//     //   const [result] = await pool.query(
-//     //     "INSERT INTO resumes (user_id, file_path, file_name, file_type) VALUES (?, ?, ?, ?)",
-//     //     [req.user.id, file_path, file_name, file_type]
-//     //   );
-//     //   res.status(201).json({ success: true, id: result.insertId });
-//     // } catch (error) {
-//     //   res.status(500).json({ success: false, message: error.message });
-//     // }
-//   });
-// };
 
 const getResumes = async (req, res) => {
   const userId = req.user.id;
@@ -280,70 +264,125 @@ const getResumes = async (req, res) => {
   }
 };
 
-// const deleteResume = async (req, res) => {
-//   const userId = req.user.id;
-//   const resumeId = req.params.id;
-
-//   try {
-//     // Get resume info
-//     const [rows] = await pool.query(
-//       "SELECT file_path FROM resumes WHERE id = ? AND user_id = ?",
-//       [resumeId, userId]
-//     );
-//     if (rows.length === 0)
-//       return res.status(404).json({ message: "Resume not found" });
-
-//     const filePath = path.resolve(__dirname, "../../", rows[0].file_path);
-
-//     // Delete DB entry
-//     await pool.query("DELETE FROM resumes WHERE id = ?", [resumeId]);
-
-//     // Delete file from filesystem
-//     if (fs.existsSync(filePath)) {
-//       fs.unlinkSync(filePath);
-//     }
-
-//     res.json({ success: true, message: "Resume deleted successfully" });
-//   } catch (error) {
-//     console.error("Delete error:", error.message);
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
 const deleteResume = async (req, res) => {
   const { id } = req.params;
-  const userId = req.user.id;
-  console.log(id, "check", userId);
+  const userId = req.user.id; // Assuming req.user.id is set by auth middleware
+
+  if (!id || !userId) {
+    // Basic validation
+    return res
+      .status(400)
+      .json({ success: false, message: "Resume ID and User ID are required" });
+  }
+
+  let dbFilePath = null; // To store the path from the DB
+
   try {
-    await pool.query("DELETE FROM resumes WHERE id = ? AND user_id = ?", [
-      id,
-      userId,
-    ]);
-    res.json({ success: true, message: "Resume deleted" });
+    // 1. Get the file path from the database AND verify ownership in one query
+    const [resumes] = await pool.query(
+      "SELECT file_path FROM resumes WHERE id = ? AND user_id = ?",
+      [id, userId]
+    );
+
+    // Check if the resume exists and belongs to the user
+    if (resumes.length === 0) {
+      // If no record found, it's either already deleted or doesn't belong to user.
+      // Returning 404 is appropriate.
+      return res.status(404).json({
+        success: false,
+        message: "Resume not found or you do not have permission to delete it",
+      });
+    }
+
+    dbFilePath = resumes[0].file_path;
+
+    // Only attempt file deletion if a path was actually stored
+    if (dbFilePath) {
+      // 2. Construct the FULL, RELIABLE path to the file
+      // It's often better to use a base path relative to the project root (process.cwd())
+      // or an absolute path from configuration, rather than __dirname.
+      // Adjust this basePath according to your project structure/configuration.
+      const basePath = path.resolve(__dirname, "../../"); // Example: base path relative to this file's parent's parent
+      const fullPathToDelete = path.join(basePath, dbFilePath);
+
+      console.log(`Attempting to delete file: ${fullPathToDelete}`);
+
+      // 3. Attempt to delete the file from the filesystem asynchronously
+      try {
+        await fsPromises.unlink(fullPathToDelete);
+        console.log(`Successfully deleted file: ${fullPathToDelete}`);
+      } catch (fileError) {
+        // Handle errors during file deletion
+        if (fileError.code === "ENOENT") {
+          // ENOENT means "Error NO ENTry" or "File Not Found".
+          // This is often okay - maybe it was already deleted or never existed.
+          console.warn(
+            `File not found, likely already deleted: ${fullPathToDelete}`
+          );
+        } else {
+          // For other errors (like permissions), log it but maybe proceed
+          // depending on desired behavior. Here, we log and will proceed to delete DB record.
+          console.error(
+            `Error deleting file ${fullPathToDelete}: ${fileError.message}. Proceeding with DB record deletion.`
+          );
+          // Optional: If file deletion failure should prevent DB deletion, you could:
+          // return res.status(500).json({ success: false, message: "Failed to delete resume file." });
+        }
+      }
+    } else {
+      console.log(
+        `No file_path stored in database for resume ID: ${id}. Skipping file deletion.`
+      );
+    }
+
+    // 4. Delete the record from the database
+    // The WHERE clause ensures we only delete the specific record for the specific user
+    const [deleteResult] = await pool.query(
+      "DELETE FROM resumes WHERE id = ? AND user_id = ?",
+      [id, userId]
+    );
+
+    // Check if a row was actually deleted (should be 1 if the initial select found it)
+    if (deleteResult.affectedRows === 0) {
+      // This case should ideally be caught by the initial SELECT, but as a safeguard:
+      console.warn(
+        `DB record for resume ID ${id} and user ID ${userId} was not found for deletion, though it was selected earlier.`
+      );
+      // You might return 404 here too, or adjust based on how this state could occur.
+    }
+
+    // 5. Send success response
+    res.json({ success: true, message: "Resume deleted successfully" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    // Catch errors from database queries or unexpected issues
+    console.error("Error during resume deletion process:", error);
+    // Avoid sending response if headers already sent (less likely here, but good practice)
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: "An internal error occurred while deleting the resume.",
+      }); // Use a generic message
+    }
   }
 };
 
-// Saved Jobs CRUD
+// working one
+// const deleteResume = async (req, res) => {
+//   const { id } = req.params;
+//   const userId = req.user.id;
 
-// const createSavedJob = async (req, res) => {
-//   const { job_post_id } = req.body;
+//   console.log(id, "check", userId);
+
 //   try {
-//     const [result] = await pool.query(
-//       "INSERT INTO saved_jobs (user_id, job_post_id) VALUES (?, ?)",
-//       [req.user.id, job_post_id]
-//     );
-//     res.status(201).json({ success: true, id: result.insertId });
+//     await pool.query("DELETE FROM resumes WHERE id = ? AND user_id = ?", [
+//       id,
+//       userId,
+//     ]);
+//     res.json({ success: true, message: "Resume deleted" });
 //   } catch (error) {
-//     if (error.code === "ER_DUP_ENTRY")
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "Job already saved" });
 //     res.status(500).json({ success: false, message: error.message });
 //   }
 // };
-// update version check
 
 const createSavedJob = async (req, res) => {
   const userId = req.user.id;
@@ -408,13 +447,6 @@ const createApplication = async (req, res) => {
   // const { job_post_id, resume_id } = req.body; // frontedn doesn't send data with job_post_id so no use.
   const { jobId, resumeId } = req.body;
 
-  // console.log(
-  //   job_post_id,
-  //   resume_id,
-  //   req.body,
-  //   " check at application backend"
-  // );
-
   try {
     const [result] = await pool.query(
       "INSERT INTO job_applications (user_id, job_post_id, resume_id, status) VALUES (?, ?, ?, ?)",
@@ -429,35 +461,6 @@ const createApplication = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// before edit backup same version as above
-// // Job Applications CRUD
-// const createApplication = async (req, res) => {
-//   const userId = req.user.id;
-//   const { job_post_id, resume_id } = req.body;
-//   const { jobId, resumeId } = req.body;
-
-//   console.log(
-//     job_post_id,
-//     resume_id,
-//     req.body,∑∑∑
-//     " check at application backend"
-//   );
-
-//   try {
-//     const [result] = await pool.query(
-//       "INSERT INTO job_applications (user_id, job_post_id, resume_id, status) VALUES (?, ?, ?, ?)",
-//       [req.user.id, job_post_id, resume_id || null, "pending"]
-//     );
-//     res.status(201).json({ success: true, id: result.insertId });
-//   } catch (error) {
-//     if (error.code === "ER_DUP_ENTRY")
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "Already applied" });
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
 
 const getApplications = async (req, res) => {
   try {

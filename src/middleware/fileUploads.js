@@ -51,6 +51,18 @@ const storage = multer.diskStorage({
   },
 });
 
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     const uploadDir = "uploads/";
+//     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+//     cb(null, uploadDir);
+//   },
+//   filename: (req, file, cb) => {
+//     const ext = path.extname(file.originalname);
+//     cb(null, `${Date.now(2)}-${file.originalname.replace(ext, "")}${ext}`);
+//   },
+// });
+
 // File filter: Optional, customize per file type
 const fileFilter = (req, file, cb) => {
   const allowedTypes = {
