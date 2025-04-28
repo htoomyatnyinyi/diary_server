@@ -20,7 +20,7 @@ import {
 
 const router = express.Router();
 
-router.get("/analytics", getUserAnalytics);
+router.get("/analytics", verifyToken, getUserAnalytics);
 // Profile
 router.post("/profile", verifyToken, createProfile);
 router.get("/profile", verifyToken, getProfile);
