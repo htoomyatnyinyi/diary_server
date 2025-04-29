@@ -72,7 +72,7 @@ const createProfile = async (req, res) => {
   const userId = req.user.id;
   const { first_name, last_name, phone, gender, date_of_birth, location, bio } =
     req.body;
-
+  console.log(userId, req.body, "at crate profile");
   try {
     const [result] = await pool.query(
       "INSERT INTO job_seeker_profiles (user_id, first_name, last_name, phone, gender, date_of_birth, location, bio) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -227,7 +227,7 @@ const deleteResume = async (req, res) => {
       .json({ success: false, message: "Resume ID and User ID are required" });
   }
 
-  let dbFilePath = null; // To store the path from the DB
+  let queryFilePath = null; // To store the path from the DB
 
   try {
     // 1. Get the file path from the database AND verify ownership in one query
@@ -246,16 +246,16 @@ const deleteResume = async (req, res) => {
       });
     }
 
-    dbFilePath = resumes[0].file_path;
+    queryFilePath = resumes[0].file_path;
 
     // Only attempt file deletion if a path was actually stored
-    if (dbFilePath) {
+    if (queryFilePath) {
       // 2. Construct the FULL, RELIABLE path to the file
       // It's often better to use a base path relative to the project root (process.cwd())
       // or an absolute path from configuration, rather than __dirname.
       // Adjust this basePath according to your project structure/configuration.
       const basePath = path.resolve(__dirname, "../../"); // Example: base path relative to this file's parent's parent
-      const fullPathToDelete = path.join(basePath, dbFilePath);
+      const fullPathToDelete = path.join(basePath, queryFilePath);
 
       console.log(`Attempting to delete file: ${fullPathToDelete}`);
 
@@ -317,24 +317,6 @@ const deleteResume = async (req, res) => {
     }
   }
 };
-
-// working one
-// const deleteResume = async (req, res) => {
-//   const { id } = req.params;
-//   const userId = req.user.id;
-
-//   console.log(id, "check", userId);
-
-//   try {
-//     await pool.query("DELETE FROM resumes WHERE id = ? AND user_id = ?", [
-//       id,
-//       userId,
-//     ]);
-//     res.json({ success: true, message: "Resume deleted" });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
 
 const createSavedJob = async (req, res) => {
   const userId = req.user.id;
