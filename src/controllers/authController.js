@@ -69,7 +69,7 @@ const googleLogin = async (req, res) => {
     // res.cookie("accessToken", accessToken, {
     //   httpOnly: true,
     //   secure: process.env.NODE_ENV === "production",
-    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    //   sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
     //   path: "/",
     //   maxAge: 15 * 60 * 1000,
     // });
@@ -77,7 +77,7 @@ const googleLogin = async (req, res) => {
     // res.cookie("refreshToken", refreshToken, {
     //   httpOnly: true,
     //   secure: process.env.NODE_ENV === "production",
-    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    //   sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
     //   path: "/",
     //   maxAge: 24 * 60 * 60 * 1000,
     // });
@@ -87,7 +87,7 @@ const googleLogin = async (req, res) => {
     // res.cookie("accessToken", accessToken, {
     //   httpOnly: true,
     //   secure: true, // Required for SameSite=None and HTTPS
-    //   sameSite: "none", // Required for cross-origin requests
+    //   sameSite: "None", // Required for cross-origin requests
     //   path: "/",
     //   maxAge: 15 * 60 * 1000, // 15 minutes
     // });
@@ -95,7 +95,7 @@ const googleLogin = async (req, res) => {
     // res.cookie("refreshToken", refreshToken, {
     //   httpOnly: true,
     //   secure: true,
-    //   sameSite: "none",
+    //   sameSite: "None",
     //   path: "/",
     //   maxAge: 24 * 60 * 60 * 1000, // 1 day
     // });
@@ -106,7 +106,7 @@ const googleLogin = async (req, res) => {
       // domain: "jobdiary.vercel.app",
       httpOnly: true,
       secure: true, // Required for SameSite=None and HTTPS
-      sameSite: "none", // Required for cross-origin requests
+      sameSite: "None", // Required for cross-origin requests
       path: "/",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
@@ -115,7 +115,7 @@ const googleLogin = async (req, res) => {
       // domain: "jobdiary.vercel.app",
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: "None",
       path: "/",
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
@@ -188,7 +188,7 @@ const registerEmployer = async (req, res) => {
     // res.cookie("accessToken", accessToken, {
     //   httpOnly: true,
     //   secure: true, // Required for SameSite=None and HTTPS
-    //   sameSite: "none", // Required for cross-origin requests
+    //   sameSite: "None", // Required for cross-origin requests
     //   path: "/",
     //   maxAge: 15 * 60 * 1000, // 15 minutes
     // });
@@ -196,7 +196,7 @@ const registerEmployer = async (req, res) => {
     // res.cookie("refreshToken", refreshToken, {
     //   httpOnly: true,
     //   secure: true,
-    //   sameSite: "none",
+    //   sameSite: "None",
     //   path: "/",
     //   maxAge: 24 * 60 * 60 * 1000, // 1 day
     // });
@@ -298,7 +298,7 @@ const login = async (req, res) => {
     // res.cookie("accessToken", accessToken, {
     //   httpOnly: true,
     //   secure: process.env.NODE_ENV === "production", // Use secure in production (HTTPS)
-    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Use "none" for cross-origin in production
+    //   sameSite: process.env.NODE_ENV === "production" ? "None" : "lax", // Use "None" for cross-origin in production
     //   path: "/",
     //   maxAge: 15 * 60 * 1000, // 15 minutes
     // });
@@ -306,7 +306,7 @@ const login = async (req, res) => {
     // res.cookie("refreshToken", refreshToken, {
     //   httpOnly: true,
     //   secure: process.env.NODE_ENV === "production",
-    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    //   sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
     //   path: "/",
     //   maxAge: 24 * 60 * 60 * 1000, // 1 day
     // });
@@ -316,7 +316,7 @@ const login = async (req, res) => {
     // res.cookie("accessToken", accessToken, {
     //   httpOnly: true,
     //   secure: true, // Required for SameSite=None and HTTPS
-    //   sameSite: "none", // Required for cross-origin requests
+    //   sameSite: "None", // Required for cross-origin requests
     //   path: "/",
     //   maxAge: 15 * 60 * 1000, // 15 minutes
     // });
@@ -324,7 +324,7 @@ const login = async (req, res) => {
     // res.cookie("refreshToken", refreshToken, {
     //   httpOnly: true,
     //   secure: true,
-    //   sameSite: "none",
+    //   sameSite: "None",
     //   path: "/",
     //   maxAge: 24 * 60 * 60 * 1000, // 1 day
     // });
@@ -333,16 +333,16 @@ const login = async (req, res) => {
     // Set cookies correctly for third-party context
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false, // Required for SameSite=None and HTTPS
-      sameSite: "none", // Required for cross-origin requests
+      secure: true, // Required for SameSite=None and HTTPS
+      sameSite: "None", // Required for cross-origin requests
       // path: "/",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: "none",
+      secure: true,
+      sameSite: "None",
       // path: "/",
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
@@ -378,8 +378,8 @@ const refreshToken = async (req, res) => {
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "none",
-      path: "/",
+      sameSite: "None",
+      // path: "/",
       maxAge: 15 * 60 * 1000,
     });
 
@@ -396,15 +396,15 @@ const logout = (req, res) => {
   res.clearCookie("accessToken", {
     httpOnly: true,
     secure: true,
-    sameSite: "none",
-    path: "/",
+    sameSite: "None",
+    // path: "/",
   });
 
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: true,
-    sameSite: "none",
-    path: "/",
+    sameSite: "None",
+    // path: "/",
   });
 
   res.json({ message: "Logged out successfully" });
@@ -423,97 +423,6 @@ const getMe = async (req, res) => {
       .json({ success: false, message: "Server error", error: error.message });
   }
 };
-
-// haven't test yet
-// // New Google Login Endpoint
-// const googleLogin = async (req, res) => {
-//   try {
-//     const { token } = req.body;
-//     if (!token) {
-//       return res.status(400).json({ message: "Google token required" });
-//     }
-
-//     // Verify Google ID token
-//     const ticket = await client.verifyIdToken({
-//       idToken: token,
-//       audience: process.env.GOOGLE_CLIENT_ID,
-//     });
-
-//     const payload = ticket.getPayload();
-//     const { email, sub: googleId, name } = payload;
-
-//     // Check if email ends with @mail.com (consistent with your registration logic)
-//     if (!email.endsWith("@mail.com")) {
-//       return res.status(400).json({ message: "Email must end with @mail.com" });
-//     }
-
-//     // Check if user exists
-//     const [users] = await pool.query("SELECT * FROM users WHERE email = ?", [
-//       email,
-//     ]);
-//     let user = users[0];
-
-//     if (!user) {
-//       // Create new user
-//       const username = name || email.split("@")[0];
-//       const hashedPassword = await bcrypt.hash(googleId, 10); // Use googleId as a dummy password
-//       const userRole = "job_seeker"; // Default role, adjust as needed
-
-//       const [result] = await pool.query(
-//         "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
-//         [username, email, hashedPassword, userRole]
-//       );
-
-//       user = {
-//         id: result.insertId,
-//         email,
-//         role: userRole,
-//       };
-//     }
-
-//     // Generate tokens (consistent with your login function)
-//     const accessToken = jwt.sign(
-//       { id: user.id, email: user.email, role: user.role },
-//       process.env.JWT_SECRET,
-//       { expiresIn: "15m" }
-//     );
-
-//     const refreshToken = jwt.sign(
-//       { id: user.id, email: user.email, role: user.role },
-//       process.env.REFRESH_TOKEN_SECRET,
-//       { expiresIn: "1d" }
-//     );
-
-//     // Set cookies (consistent with your login function)
-//     res.cookie("accessToken", accessToken, {
-//       httpOnly: true,
-//       secure: process.env.NODE_ENV === "production",
-//       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-//       path: "/",
-//       maxAge: 15 * 60 * 1000,
-//     });
-
-//     res.cookie("refreshToken", refreshToken, {
-//       httpOnly: true,
-//       secure: process.env.NODE_ENV === "production",
-//       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-//       path: "/",
-//       maxAge: 24 * 60 * 60 * 1000,
-//     });
-
-//     res.json({
-//       user: { id: user.id, email: user.email, role: user.role },
-//       accessToken,
-//       refreshToken,
-//     });
-//   } catch (error) {
-//     console.error("Google login error:", error);
-//     res.status(500).json({
-//       message: "Error during Google login",
-//       error: error.message,
-//     });
-//   }
-// };
 
 export {
   registerEmployer,
