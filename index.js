@@ -23,29 +23,29 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// app.use(
-//   cors({
-//     origin: (origin, callback) => {
-//       const allowedOrigins = [process.env.FRONTEND_URL].filter(Boolean);
-
-//       if (!origin || allowedOrigins.includes(origin)) callback(null, true);
-//       else callback(new Error("Not allowed by CORS"));
-//     },
-//     credentials: true,
-
-//     // methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-//     // allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
-
 app.use(
   cors({
-    origin: "https://jobdiary.vercel.app", // Frontend origin
+    origin: (origin, callback) => {
+      const allowedOrigins = [process.env.FRONTEND_URL].filter(Boolean);
+
+      if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+      else callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
-    // methods: ["GET", "POST", "OPTIONS"],
+
+    // methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     // allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// app.use(
+//   cors({
+//     origin: "https://jobdiary.vercel.app", // Frontend origin
+//     credentials: true,
+//     // methods: ["GET", "POST", "OPTIONS"],
+//     // allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
 
 app.use(express.json());
 app.use(cookieParser());
