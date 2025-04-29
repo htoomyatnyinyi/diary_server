@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import pool from "../config/database.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+// console.log(process.env.NODE_ENV === "production", " checck at backend");
 
 const googleLogin = async (req, res) => {
   try {
@@ -64,21 +65,38 @@ const googleLogin = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    // Set cookies
+    // // Set cookies
+    // res.cookie("accessToken", accessToken, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    //   path: "/",
+    //   maxAge: 15 * 60 * 1000,
+    // });
+
+    // res.cookie("refreshToken", refreshToken, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    //   path: "/",
+    //   maxAge: 24 * 60 * 60 * 1000,
+    // });
+
+    // Set cookies correctly for third-party context
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: true, // Required for SameSite=None and HTTPS
+      sameSite: "none", // Required for cross-origin requests
       path: "/",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
       path: "/",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
     res.json({
@@ -256,38 +274,38 @@ const login = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Use secure in production (HTTPS)
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Use "none" for cross-origin in production
-      path: "/",
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      path: "/",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    });
-
-    // // Set cookies correctly for third-party context
     // res.cookie("accessToken", accessToken, {
     //   httpOnly: true,
-    //   secure: true, // Required for SameSite=None and HTTPS
-    //   sameSite: "none", // Required for cross-origin requests
+    //   secure: process.env.NODE_ENV === "production", // Use secure in production (HTTPS)
+    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Use "none" for cross-origin in production
     //   path: "/",
     //   maxAge: 15 * 60 * 1000, // 15 minutes
     // });
 
     // res.cookie("refreshToken", refreshToken, {
     //   httpOnly: true,
-    //   secure: true,
-    //   sameSite: "none",
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     //   path: "/",
     //   maxAge: 24 * 60 * 60 * 1000, // 1 day
     // });
+
+    // Set cookies correctly for third-party context
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: true, // Required for SameSite=None and HTTPS
+      sameSite: "none", // Required for cross-origin requests
+      path: "/",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
 
     res.json({
       user: { id: user.id, email: user.email, role: user.role },
