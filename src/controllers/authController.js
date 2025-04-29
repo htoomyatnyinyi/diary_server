@@ -333,7 +333,7 @@ const login = async (req, res) => {
     // Set cookies correctly for third-party context
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: true, // Required for SameSite=None and HTTPS
+      secure: false, // Required for SameSite=None and HTTPS
       sameSite: "none", // Required for cross-origin requests
       // path: "/",
       maxAge: 15 * 60 * 1000, // 15 minutes
@@ -341,7 +341,7 @@ const login = async (req, res) => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: "none",
       // path: "/",
       maxAge: 24 * 60 * 60 * 1000, // 1 day
