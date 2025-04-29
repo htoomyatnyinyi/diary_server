@@ -103,7 +103,7 @@ const googleLogin = async (req, res) => {
     // version 3
     // Set cookies correctly for third-party context
     res.cookie("accessToken", accessToken, {
-      domain: ".jobdiary.vercel.app",
+      domain: "jobdiary.vercel.app",
       httpOnly: true,
       secure: true, // Required for SameSite=None and HTTPS
       sameSite: "none", // Required for cross-origin requests
@@ -112,7 +112,7 @@ const googleLogin = async (req, res) => {
     });
 
     res.cookie("refreshToken", refreshToken, {
-      domain: ".jobdiary.vercel.app",
+      domain: "jobdiary.vercel.app",
       httpOnly: true,
       secure: true,
       sameSite: "none",
@@ -332,7 +332,7 @@ const login = async (req, res) => {
     //version 3
     // Set cookies correctly for third-party context
     res.cookie("accessToken", accessToken, {
-      domain: ".jobdiary.vercel.app",
+      domain: "jobdiary.vercel.app",
       httpOnly: true,
       secure: true, // Required for SameSite=None and HTTPS
       sameSite: "none", // Required for cross-origin requests
@@ -341,7 +341,7 @@ const login = async (req, res) => {
     });
 
     res.cookie("refreshToken", refreshToken, {
-      domain: ".jobdiary.vercel.app",
+      domain: "jobdiary.vercel.app",
       httpOnly: true,
       secure: true,
       sameSite: "none",
@@ -378,7 +378,7 @@ const refreshToken = async (req, res) => {
     );
 
     res.cookie("accessToken", newAccessToken, {
-      domain: ".jobdiary.vercel.app", // if have domain
+      domain: "jobdiary.vercel.app", // if have domain
       httpOnly: true,
       secure: true,
       sameSite: "none",
@@ -397,7 +397,7 @@ const refreshToken = async (req, res) => {
 
 const logout = (req, res) => {
   res.clearCookie("accessToken", {
-    domain: ".jobdiary.vercel.app",
+    domain: "jobdiary.vercel.app",
     httpOnly: true,
     secure: true,
     sameSite: "none",
@@ -405,7 +405,7 @@ const logout = (req, res) => {
   });
 
   res.clearCookie("refreshToken", {
-    domain: ".jobdiary.vercel.app",
+    domain: "jobdiary.vercel.app",
     httpOnly: true,
     secure: true,
     sameSite: "none",
