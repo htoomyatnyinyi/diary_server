@@ -103,19 +103,19 @@ const googleLogin = async (req, res) => {
     // version 3
     // Set cookies correctly for third-party context
     res.cookie("accessToken", accessToken, {
-      domain: "jobdiary.vercel.app",
+      // domain: "jobdiary.vercel.app",
       httpOnly: true,
       secure: true, // Required for SameSite=None and HTTPS
-      sameSite: "none", // Required for cross-origin requests
+      sameSite: "lax", // Required for cross-origin requests
       path: "/",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie("refreshToken", refreshToken, {
-      domain: "jobdiary.vercel.app",
+      // domain: "jobdiary.vercel.app",
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: "lax",
       path: "/",
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
@@ -332,19 +332,19 @@ const login = async (req, res) => {
     //version 3
     // Set cookies correctly for third-party context
     res.cookie("accessToken", accessToken, {
-      domain: "jobdiary.vercel.app",
+      // domain: "jobdiary.vercel.app",
       httpOnly: true,
       secure: true, // Required for SameSite=None and HTTPS
-      sameSite: "none", // Required for cross-origin requests
+      sameSite: "lax", // Required for cross-origin requests
       path: "/",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie("refreshToken", refreshToken, {
-      domain: "jobdiary.vercel.app",
+      // domain: "jobdiary.vercel.app",
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: "lax",
       path: "/",
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
@@ -378,10 +378,10 @@ const refreshToken = async (req, res) => {
     );
 
     res.cookie("accessToken", newAccessToken, {
-      domain: "jobdiary.vercel.app", // if have domain
+      // domain: "jobdiary.vercel.app", // if have domain
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: "lax",
       path: "/",
       maxAge: 15 * 60 * 1000,
     });
@@ -397,18 +397,18 @@ const refreshToken = async (req, res) => {
 
 const logout = (req, res) => {
   res.clearCookie("accessToken", {
-    domain: "jobdiary.vercel.app",
+    // domain: "jobdiary.vercel.app",
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "lax",
     path: "/",
   });
 
   res.clearCookie("refreshToken", {
-    domain: "jobdiary.vercel.app",
+    // domain: "jobdiary.vercel.app",
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "lax",
     path: "/",
   });
 
