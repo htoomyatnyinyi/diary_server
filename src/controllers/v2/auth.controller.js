@@ -161,7 +161,7 @@ const logout = (req, res) => {
     // path: "/",
   });
 
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("refreshToken", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
