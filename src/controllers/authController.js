@@ -204,19 +204,38 @@ const login = async (req, res) => {
       { expiresIn: "1d" }
     );
 
+    // res.cookie("accessToken", accessToken, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "None", // "Lax"
+    //   path: "/",
+    //   maxAge: 15 * 60 * 1000,
+    // });
+
+    // res.cookie("refreshToken", refreshToken, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "None", // "Lax"
+    //   path: "/",
+    //   maxAge: 24 * 60 * 60 * 1000,
+    // });
+
+    // version2
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "None", // "Lax"
+      sameSite: "None",
       path: "/",
+      domain: ".jobdiary.vercel.app",
       maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "None", // "Lax"
+      sameSite: "None",
       path: "/",
+      domain: ".jobdiary.vercel.app",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
