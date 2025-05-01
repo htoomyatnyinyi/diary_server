@@ -63,7 +63,7 @@ const googleLogin = async (req, res) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true, // Always true for production (HTTPS)
-      sameSite: "lax", // Use Lax for same-site context to avoid ITP
+      sameSite: "None", // Lax // Use Lax for same-site context to avoid ITP
       path: "/",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
@@ -71,7 +71,7 @@ const googleLogin = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "None",
       path: "/",
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
@@ -207,7 +207,7 @@ const login = async (req, res) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "None",
       path: "/",
       maxAge: 15 * 60 * 1000,
     });
@@ -215,7 +215,7 @@ const login = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "None",
       path: "/",
       maxAge: 24 * 60 * 60 * 1000,
     });
@@ -251,7 +251,7 @@ const refreshToken = async (req, res) => {
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "None",
       path: "/",
       maxAge: 15 * 60 * 1000,
     });
@@ -269,14 +269,14 @@ const logout = (req, res) => {
   res.clearCookie("accessToken", {
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
+    sameSite: "None",
     path: "/",
   });
 
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
+    sameSite: "None",
     path: "/",
   });
 
