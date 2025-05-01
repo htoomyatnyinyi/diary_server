@@ -226,7 +226,7 @@ const login = async (req, res) => {
       secure: true,
       sameSite: "None",
       path: "/",
-      domain: ".jobdiary.vercel.app",
+      domain: "jobdiary.vercel.app",
       maxAge: 15 * 60 * 1000,
     });
 
@@ -235,7 +235,7 @@ const login = async (req, res) => {
       secure: true,
       sameSite: "None",
       path: "/",
-      domain: ".jobdiary.vercel.app",
+      domain: "jobdiary.vercel.app",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
