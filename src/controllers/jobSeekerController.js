@@ -109,59 +109,222 @@ const getProfile = async (req, res) => {
   }
 };
 
-const updateProfile = async (req, res) => {
-  const userId = req.user.id;
+// // Route to handle profile image upload
+// const updateProfileImage = (req, res) => {
+//   fileUploads.single("profile_img")(req, res, async (err) => {
+//     console.log(req.body, req.file, "check at backend upload");
+//     res.json({ message: "route is correct" });
+//     // if (err) {
+//     //   return res.status(400).json({ success: false, message: err.message });
+//     // }
+//     // console.log(req.file, "at backend");
+//     // if (!req.file) {
+//     //   return res
+//     //     .status(400)
+//     //     .json({ success: false, message: "No file uploaded" });
+//     // }
 
-  const { first_name, last_name, phone, gender, date_of_birth, location, bio } =
-    req.body;
-  console.log(req.body, " at update profile ");
+//     // // Construct the file path relative to the server
+//     // const filePath = `/Uploads/profile_img/${req.file.filename}`; // Matches multer's storage config
+//     // const fileName = req.file.filename;
+//     // const fileType = req.file.mimetype;
 
-  try {
-    const updates = [];
-    const values = [];
-    if (first_name) {
-      updates.push("first_name = ?");
-      values.push(first_name);
-    }
-    if (last_name) {
-      updates.push("last_name = ?");
-      values.push(last_name);
-    }
-    if (phone) {
-      updates.push("phone = ?");
-      values.push(phone);
-    }
-    if (gender) {
-      updates.push("gender = ?");
-      values.push(gender);
-    }
-    if (date_of_birth) {
-      updates.push("date_of_birth = ?");
-      values.push(date_of_birth);
-    }
-    if (location) {
-      updates.push("location = ?");
-      values.push(location);
-    }
-    if (bio) {
-      updates.push("bio = ?");
-      values.push(bio);
+//     // console.log("File uploaded:", { filePath, fileName, fileType });
+
+//     // // Return the file path to the frontend
+//     // res.status(200).json({
+//     //   success: true,
+//     //   message: "File uploaded successfully",
+//     //   filePath,
+//     //   fileName,
+//     //   fileType,
+//     // });
+//   });
+// };
+
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+
+const updateProfile = (req, res) => {
+  // Handle file upload first
+  // fileUploads.single(["profile_img", "cover_img"])(req, res, async (err) => {
+  fileUploads.fields([
+    { name: "profile_img", maxCount: 1 },
+    { name: "cover_img", maxCount: 1 },
+  ])(req, res, async (err) => {
+    if (err) {
+      console.error("Multer error:", err.message);
+      return res.status(400).json({ message: err.message });
     }
 
-    if (updates.length) {
-      values.push(req.user.id);
-      await pool.query(
-        `UPDATE job_seeker_profiles SET ${updates.join(
-          ", "
-        )} WHERE user_id = ?`,
-        values
-      );
+    const userId = req.user.id;
+    const {
+      first_name,
+      last_name,
+      phone,
+      gender,
+      date_of_birth,
+      location,
+      bio,
+    } = req.body;
+    console.log(req.body, " at update profile");
+
+    let filePath;
+
+    if (req.file) {
+      filePath = `/uploads/profile_img/${req.file.filename}`;
+      console.log("File uploaded:", req.file);
     }
-    res.json({ success: true, message: "Profile updated" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+
+    try {
+      const updates = [];
+      const values = [];
+
+      if (first_name) {
+        updates.push("first_name = ?");
+        values.push(first_name);
+      }
+      if (last_name) {
+        updates.push("last_name = ?");
+        values.push(last_name);
+      }
+      if (phone) {
+        updates.push("phone = ?");
+        values.push(phone);
+      }
+      if (gender) {
+        updates.push("gender = ?");
+        values.push(gender);
+      }
+      if (date_of_birth) {
+        updates.push("date_of_birth = ?");
+        values.push(date_of_birth);
+      }
+      if (location) {
+        updates.push("location = ?");
+        values.push(location);
+      }
+      if (bio) {
+        updates.push("bio = ?");
+        values.push(bio);
+      }
+      if (filePath) {
+        updates.push("profile_image_url = ?");
+        values.push(filePath);
+      }
+
+      if (updates.length) {
+        values.push(userId);
+        await pool.query(
+          `UPDATE job_seeker_profiles SET ${updates.join(
+            ", "
+          )} WHERE user_id = ?`,
+          values
+        );
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Profile updated successfully",
+        data: filePath ? { profile_image: filePath } : undefined,
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  });
 };
+
+// // Update profile image
+// const updateProfileImage = (req, res) => {
+//   fileUploads.single("profile_img")(req, res, async (err) => {
+//     if (err) {
+//       console.error("Multer error:", err.message);
+//       return res.status(400).json({ message: err.message });
+//     }
+
+//     if (!req.file) {
+//       console.error("No file uploaded");
+//       return res.status(400).json({ message: "No file uploaded" });
+//     }
+
+//     console.log("File uploaded:", req.file);
+
+//     // Construct the file URL (adjust based on your server setup)
+//     const filePath = `/uploads/profile_img/${req.file.filename}`;
+
+//     try {
+//       // Here, you might want to save the filePath to your database
+//       // Example: await UserModel.updateOne({ _id: req.user.id }, { profileImage: filePath });
+
+//       res.status(200).json({
+//         status: 200,
+//         data: {
+//           filePath,
+//         },
+//         message: "Profile image uploaded successfully",
+//       });
+//     } catch (error) {
+//       console.error("Database error:", error);
+//       res.status(500).json({ message: "Server error while saving file path" });
+//     }
+//   });
+// };
+
+// // original code workin gwithout upload images
+// const updateProfile = async (req, res) => {
+//   const userId = req.user.id;
+
+//   const { first_name, last_name, phone, gender, date_of_birth, location, bio } =
+//     req.body;
+//   console.log(req.body, " at update profile ");
+
+//   try {
+//     const updates = [];
+//     const values = [];
+//     if (first_name) {
+//       updates.push("first_name = ?");
+//       values.push(first_name);
+//     }
+//     if (last_name) {
+//       updates.push("last_name = ?");
+//       values.push(last_name);
+//     }
+//     if (phone) {
+//       updates.push("phone = ?");
+//       values.push(phone);
+//     }
+//     if (gender) {
+//       updates.push("gender = ?");
+//       values.push(gender);
+//     }
+//     if (date_of_birth) {
+//       updates.push("date_of_birth = ?");
+//       values.push(date_of_birth);
+//     }
+//     if (location) {
+//       updates.push("location = ?");
+//       values.push(location);
+//     }
+//     if (bio) {
+//       updates.push("bio = ?");
+//       values.push(bio);
+//     }
+
+//     if (updates.length) {
+//       values.push(req.user.id);
+//       await pool.query(
+//         `UPDATE job_seeker_profiles SET ${updates.join(
+//           ", "
+//         )} WHERE user_id = ?`,
+//         values
+//       );
+//     }
+//     res.json({ success: true, message: "Profile updated" });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
 
 const deleteProfile = async (req, res) => {
   try {
@@ -491,6 +654,7 @@ export {
   createProfile,
   getProfile,
   updateProfile,
+  // updateProfileImage,
   deleteProfile,
   createResume,
   getResumes,

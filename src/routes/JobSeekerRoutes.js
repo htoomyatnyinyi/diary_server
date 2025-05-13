@@ -16,6 +16,7 @@ import {
   getApplications,
   deleteApplication,
   getUserAnalytics,
+  // updateProfileImage,
 } from "../controllers/jobSeekerController.js";
 
 const router = express.Router();
@@ -25,6 +26,7 @@ router.get("/analytics", verifyToken, getUserAnalytics);
 router.post("/profile", verifyToken, createProfile);
 router.get("/profile", verifyToken, getProfile);
 router.put("/profile", verifyToken, updateProfile);
+// router.put("/profile_img", verifyToken, updateProfileImage);
 router.delete("/profile", deleteProfile);
 
 // Resumes
